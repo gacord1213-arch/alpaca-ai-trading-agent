@@ -1,0 +1,8 @@
+alpaca-py==0.44.0
+openai==3.3.1
+pandas==3.0.5
+python-dotenv==1.2.3
+mcp==1.29.0
+
+# The official Alpaca MCP server is vendored under mcp_server/ — install it editable:
+#   uv pip install -e mcp_server
