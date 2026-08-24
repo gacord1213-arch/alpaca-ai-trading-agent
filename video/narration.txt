@@ -1,0 +1,11 @@
+[Scene 1] Most trading bots just run hardcoded rules. Ours is different. This is a true autonomous agent: a large language model, Claude, that thinks, analyzes the market, and makes its own trading decisions through tool calling. And it speaks directly to the official Alpaca M C P server. Let me show you.
+
+[Scene 2] When it runs, the agent boots the official Alpaca M C P server, and seventy-four tools become available instantly — stocks, crypto, options, portfolio. Notice the agent doesn't just buy. It first calls tools to inspect the account, pull price snapshots, and read the news. Then it decides.
+
+[Scene 3] Here it decides. For N-VIDIA it buys, but deliberately sizes to just eight percent of equity — below its fifteen percent cap — because earnings are this week. For Bitcoin, even though sentiment is bullish, it refuses to enter: R-S-I is eighty-two, parabolic. In its own words: discipline wins, don't chase the top. This isn't an if-else statement. This is judgment.
+
+[Scene 4] Every decision blends two sides: technical analysis — R-S-I, moving averages, momentum — and news sentiment that Claude scores itself. And there's a hard guardrail: a per-order cap. When an order exceeds it, the agent adapts on its own instead of crashing. A-I, plus a safety rail.
+
+[Scene 5] We don't just claim results. A one-year backtest gives real metrics: return, Sharpe ratio, max drawdown, win-rate, versus buy and hold. On calm markets like the S-P-Y, our trend strategy delivers a Sharpe of one point four with a small drawdown. On highly volatile stocks, the mechanical strategy loses to buy and hold — and that is exactly why we put L-L-M reasoning and sentiment on top of raw signals. We know precisely when this approach is strong, and when it isn't.
+
+[Scene 6] One brain, two tool backends: a lightweight local layer, or the official Alpaca M C P server. Everything is paper-trading, safe, with full reasoning logged. Autonomous, transparent, and built right on top of the Alpaca ecosystem. Thank you.
