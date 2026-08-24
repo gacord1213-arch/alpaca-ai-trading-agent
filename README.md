@@ -1,23 +1,78 @@
 # 🤖 Alpaca AI Trading Agent
 
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white">
+  <img alt="Alpaca" src="https://img.shields.io/badge/Alpaca-Trading%20API-FFD200?logo=alpaca">
+  <img alt="MCP" src="https://img.shields.io/badge/MCP-74%20official%20tools-6E56CF">
+  <img alt="Claude" src="https://img.shields.io/badge/brain-Claude%20(tool--calling)-D97757">
+  <img alt="Paper trading" src="https://img.shields.io/badge/mode-paper%20trading%20only-2ea043">
+</p>
+
 Autonomous AI trading agent for the **[Alpaca AI Trading Agents Hackathon](https://lablab.ai/ai-hackathons/alpaca-ai-trading-agents-hackathon)** (lablab.ai).
 
-An LLM (Claude) acts as the *brain* of a trading agent: it inspects the account, reads technical indicators **and** news sentiment, then decides and executes trades autonomously on an **Alpaca paper account** — explaining its reasoning for every decision.
+An LLM (**Claude**) acts as the *brain* of a trading agent: it inspects the account, reads technical indicators **and** news sentiment, then decides and executes trades autonomously on an **Alpaca paper account** — explaining its reasoning for every decision. It can drive the **official Alpaca MCP Server (74 tools)** for stocks, 24/7 crypto, and options.
 
 > ⚠️ **Paper trading only** (virtual money). No live funds. Not financial advice.
 
 ---
 
+## 🎬 Demo video
+
+▶️ **[`video/alpaca_demo.mp4`](video/alpaca_demo.mp4)** — 2-minute walkthrough with English voice-over: the agentic loop, a live NVDA/BTC decision, and the backtest results. Narration transcript in [`video/narration.txt`](video/narration.txt).
+
+---
+
 ## ✨ Highlights
 
-- **True agentic loop** — Claude drives via **tool-calling** (OpenAI-compatible function calling), not a hardcoded strategy. It *chooses* which tools to call.
-- **🔌 Official Alpaca MCP Server** — optional `--mcp` mode connects Claude to the **official [alpacahq/alpaca-mcp-server](https://github.com/alpacahq/alpaca-mcp-server)** (74 tools: stocks, **crypto 24/7**, **options chains**, watchlists, portfolio history, market movers). This is the hackathon's core theme.
+- **True agentic loop** — Claude drives via **tool-calling** (OpenAI-compatible function calling), not a hardcoded strategy. It *chooses* which tools to call and when.
+- **🔌 Official Alpaca MCP Server** — `--mcp` mode connects Claude to the **official [alpacahq/alpaca-mcp-server](https://github.com/alpacahq/alpaca-mcp-server)** (**74 tools**: stocks, **crypto 24/7**, **options chains**, watchlists, portfolio history, market movers). *This is the hackathon's core theme.*
 - **Hybrid signal** — combines **technical analysis** (RSI, SMA20/50, momentum) with **LLM news-sentiment** scoring.
-- **📈 Backtesting engine** — validates the strategy on historical data with real metrics: total return, CAGR, win-rate, max drawdown, Sharpe ratio, and a buy & hold baseline comparison.
+- **📈 Backtesting engine** — validates the strategy on historical data with real metrics: total return, CAGR, win-rate, max drawdown, **Sharpe ratio**, and a buy & hold baseline.
 - **Explainable** — every decision comes with written reasoning (logged) — great for demo & judging.
-- **Risk guardrails** — hard per-order notional cap; the agent adapts when an order is rejected.
+- **Risk guardrails** — hard per-order notional cap; the agent adapts when an order is rejected instead of crashing.
 - **Autonomous scheduler** — runs on a schedule, respects market hours.
 - **Live dashboard** — CLI + dark-themed HTML portfolio report.
+
+---
+
+## 🏆 How this maps to the judging criteria
+
+| Criterion | How this project delivers |
+|-----------|---------------------------|
+| **Application of Technology** | Genuine agentic tool-calling loop over **both** a local tool layer and the **official Alpaca MCP Server (74 tools)** — stocks, crypto, options — the exact ecosystem the hackathon is built around. |
+| **Presentation** | 2-min voice-over [demo video](video/alpaca_demo.mp4), clean README with architecture diagram, and fully explainable per-decision reasoning. |
+| **Business Value** | A disciplined, risk-capped agent that blends technicals + news sentiment and is **backtested** — not a black box; you can see *when* it wins and *when* it holds. |
+| **Originality** | LLM reasoning is the strategy engine (not just a wrapper): it sizes positions under risk limits and can override raw signals, e.g. **HOLD** an overbought parabolic asset. |
+
+---
+
+## ⚡ Quick start
+
+```bash
+# 1. enter project & create venv
+cd alpaca-agent
+uv venv .venv
+source .venv/Scripts/activate    # Windows (git-bash) | Linux/mac: source .venv/bin/activate
+uv pip install -r requirements.txt
+
+# 2. configure credentials
+cp .env.example .env             # then edit .env with your Alpaca PAPER keys
+
+# 3. run one autonomous decision cycle
+python agent.py --symbols AAPL,NVDA,MSFT --force
+```
+
+`.env` fields:
+
+```
+APCA_API_KEY_ID=...              # Alpaca PAPER key
+APCA_API_SECRET_KEY=...
+APCA_API_BASE_URL=https://paper-api.alpaca.markets
+
+LLM_BASE_URL=https://gorouter.app/v1   # OpenAI-compatible endpoint
+LLM_API_KEY=...
+LLM_MODEL=claude-opus-4-8-thinking
+```
 
 ---
 
@@ -55,7 +110,7 @@ An LLM (Claude) acts as the *brain* of a trading agent: it inspects the account,
  └─────────────┘ └──────────────┘    └────────────────┘  └──────────────┘
 ```
 
-**Two tool backends, same brain:** by default the agent uses the lightweight local tool layer (fast, token-cheap). Pass `--mcp` and the exact same reasoning loop instead speaks to the **official Alpaca MCP Server** over stdio — proving ecosystem fluency for the judges while unlocking crypto, options, and portfolio-history tools.
+**Two tool backends, same brain:** by default the agent uses the lightweight local tool layer (fast, token-cheap). Pass `--mcp` and the exact same reasoning loop instead speaks to the **official Alpaca MCP Server** over stdio — proving ecosystem fluency while unlocking crypto, options, and portfolio-history tools.
 
 **Decision flow per cycle:**
 1. Inspect account + positions → know current state
@@ -63,35 +118,6 @@ An LLM (Claude) acts as the *brain* of a trading agent: it inspects the account,
 3. Claude reasons over technical + sentiment, sizes positions under risk limits
 4. Places / closes orders → executed on paper account
 5. Everything logged to `logs/agent.log`
-
----
-
-## 📦 Setup
-
-```bash
-# 1. clone / enter project
-cd alpaca-agent
-
-# 2. create venv & install
-uv venv .venv
-source .venv/Scripts/activate    # Windows (git-bash) | Linux/mac: source .venv/bin/activate
-uv pip install -r requirements.txt
-
-# 3. configure credentials
-cp .env.example .env             # then edit .env with your keys
-```
-
-`.env` fields:
-
-```
-APCA_API_KEY_ID=...              # Alpaca PAPER key
-APCA_API_SECRET_KEY=...
-APCA_API_BASE_URL=https://paper-api.alpaca.markets
-
-LLM_BASE_URL=https://gorouter.app/v1   # OpenAI-compatible endpoint
-LLM_API_KEY=...
-LLM_MODEL=claude-opus-4-8-thinking
-```
 
 ---
 
@@ -126,6 +152,21 @@ uv pip install -e mcp_server        # exposes the `alpaca-mcp-server` console sc
 python mcp_bridge.py                # smoke test: lists 74 tools, calls get_clock
 ```
 
+### Example: an explainable live decision
+
+```text
+$ python agent.py --mcp --symbols NVDA,BTC/USD
+### MCP ready: 74 tools cataloged ###
+TOOL get_account_info -> equity $100,000
+TOOL get_stock_snapshot NVDA / get_news
+
+CLAUDE:
+  NVDA -> BUY $8k (only 8% of equity — earnings risk this week, below my 15% cap)
+  BTC/USD -> HOLD. Sentiment bullish, but RSI 82, parabolic. Discipline wins — don't chase the top.
+```
+
+*(Illustrative of the agent's logged reasoning. Actual numbers depend on live market data at run time.)*
+
 ---
 
 ## 🗂️ Project layout
@@ -143,6 +184,7 @@ python mcp_bridge.py                # smoke test: lists 74 tools, calls get_cloc
 | `scheduler.py` | Autonomous scheduled runner (market-aware) |
 | `dashboard.py` | CLI + HTML portfolio report |
 | `smoke_test.py` | End-to-end connectivity check |
+| `make_video.py` | Generates the narrated demo video (`video/alpaca_demo.mp4`) |
 
 ---
 
@@ -150,7 +192,7 @@ python mcp_bridge.py                # smoke test: lists 74 tools, calls get_cloc
 
 - **Paper account only** — `config.py` refuses to run against a non-paper base URL.
 - Per-order notional cap (`MAX_NOTIONAL_PER_ORDER` in `tools.py`).
-- Secrets live only in `.env` (git-ignored) — never hardcoded.
+- Secrets live only in `.env` (git-ignored) — never hardcoded, never committed.
 
 ---
 
